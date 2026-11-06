@@ -48,19 +48,29 @@ while True:
             x=int(indice.x*ancho)
             y=int(indice.y*alto)
 
-            mano_cerrada=(indice.y>nudillo_indice.y and medio.y>nudillo_medio.y and anular.y>nudillo_anular.y and menique.y>nudillo_menique.y)
-            if mano_cerrada:
+            indice_arriba=indice.y<nudillo_indice.y
+            medio_arriba=medio.y<nudillo_medio.y
+            anular_arriba=anular.y<nudillo_anular.y
+            menique_arriba=menique.y<nudillo_menique.y
+
+            #MODO BORRADOR con el puño cerrado
+            if not indice_arriba and not medio_arriba and not anular_arriba and not menique_arriba:
                 lienzo=np.zeros_like(frame)
-                cv2.putText(frame,"Borrando",(50,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),3)
+                cv2.putText(frame,"Borrando",(20,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),3)
                 xp,yp=0,0
-            else:
+            #MODO MOVIMIENTO con una V
+            elif indice_arriba and medio_arriba and not anular_arriba and not menique_arriba:
+                cv2.putText(frame,"Moviendo",(20,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,0),3)
+                cv2.rectangle(frame, (x-15,y-15), (x+15,y+15), (255,0,0), cv2.FILLED)
+                xp,yp=0,0
+            #MODO DIBUJO con el dedo índice levantado y el medio abajo
+            elif indice_arriba and not medio_arriba:
+                cv2.putText(frame,"Dibujando",(20,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,255),3)
+                cv2.circle(frame,(x,y),15,(255,0,255),cv2.FILLED)
                 if xp==0 and yp==0:
                     xp,yp=x,y
-                #trayectoria de la mano
-                cv2.line(lienzo,(xp,yp),(x,y), (255,0,255), 10)
+                cv2.line(lienzo,(xp,yp),(x,y),(255,0,255),10)
                 xp,yp=x,y
-            #cursores de la mano
-            cv2.circle(frame,(x,y),15,(0,0,255),cv2.FILLED)
     else:
         xp,yp=0,0
 
