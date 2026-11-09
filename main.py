@@ -75,6 +75,38 @@ while True:
         xp,yp=0,0
 
     lienzo_gray=cv2.cvtColor(lienzo,cv2.COLOR_BGR2GRAY)
+
+    contornos,_=cv2.findContours(lienzo_gray,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    if contornos:
+        alto,ancho,_=frame.shape
+        x_min,y_min=ancho,alto
+        x_max,y_max=0,0
+        for c in contornos:
+            x_c,y_c,w_c,h_c=cv2.boundingRect(c)
+            if x_c< x_min: x_min =x_c
+            if y_c< y_min: y_min =y_c
+            if x_c+w_c> x_max: x_max =x_c+w_c
+            if y_c+h_c> y_max: y_max =y_c+h_c
+
+        cv2.rectangle(frame, (x_min,y_min),(x_max,y_max),(0,255,0),2)
+        #ROIs con padding
+        padding=20
+        y1=max(0,y_min-padding)
+        y2=min(alto,y_max+padding)
+        x1=max(0,x_min-padding)
+        x2=min(ancho,x_max+padding)
+        roi=lienzo[y1:y2,x1:x2]
+
+        if roi.size>0:
+            cv2.imshow("ROI",roi)
+    else:
+        #si no hay contornos, se cierra la ventana de ROI
+        try:
+            cv2.destroyWindow("ROI")   
+        except:
+            pass
+
+
     _,lienzo_inv=cv2.threshold(lienzo_gray,50,255,cv2.THRESH_BINARY_INV)
     lienzo_inv=cv2.cvtColor(lienzo_inv,cv2.COLOR_GRAY2BGR)
     frame=cv2.bitwise_and(frame,lienzo_inv)
